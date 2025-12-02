@@ -42,6 +42,14 @@ function [F_star, feasible] = opt_comm_WOA_BHC(H_comm, sigmasq_comm, P_comm, F_s
         woa_params.boundary_threshold = 0.15;
     end
     
+    % Default penalty weights (can be customized via woa_params)
+    if ~isfield(woa_params, 'sinr_penalty_weight')
+        woa_params.sinr_penalty_weight = 1000;
+    end
+    if ~isfield(woa_params, 'power_penalty_weight')
+        woa_params.power_penalty_weight = 1000;
+    end
+    
     % Decision variable dimension: F is U x (M*N) complex
     % Encode as real vector: [real(F(:)); imag(F(:))]
     dim = 2 * U * M * N;
@@ -52,7 +60,9 @@ function [F_star, feasible] = opt_comm_WOA_BHC(H_comm, sigmasq_comm, P_comm, F_s
     ub = max_amp * ones(1, dim);
     
     % Define objective function with penalty method
-    objective = @(x) compute_penalty(x, H_st, F_sensing_st, sigmasq_comm, P_comm, gamma, U, M, N, D);
+    sinr_weight = woa_params.sinr_penalty_weight;
+    power_weight = woa_params.power_penalty_weight;
+    objective = @(x) compute_penalty(x, H_st, F_sensing_st, sigmasq_comm, P_comm, gamma, U, M, N, D, sinr_weight, power_weight);
     
     % Run WOA-BHC optimization
     [best_pos, best_score, ~] = WOA_BHC(objective, dim, woa_params.SearchAgents, ...
@@ -63,7 +73,7 @@ function [F_star, feasible] = opt_comm_WOA_BHC(H_comm, sigmasq_comm, P_comm, F_s
     
     % Check feasibility
     [penalty, sinr_violation, power_violation] = compute_penalty(best_pos, H_st, F_sensing_st, ...
-        sigmasq_comm, P_comm, gamma, U, M, N, D);
+        sigmasq_comm, P_comm, gamma, U, M, N, D, sinr_weight, power_weight);
     
     % Consider feasible if constraints are approximately satisfied
     feasibility_tol = 1e-3;
@@ -77,14 +87,10 @@ function [F_star, feasible] = opt_comm_WOA_BHC(H_comm, sigmasq_comm, P_comm, F_s
     end
 end
 
-function [total_penalty, sinr_violation, power_violation] = compute_penalty(x, H_st, F_sensing_st, sigmasq_comm, P_comm, gamma, U, M, N, D)
+function [total_penalty, sinr_violation, power_violation] = compute_penalty(x, H_st, F_sensing_st, sigmasq_comm, P_comm, gamma, U, M, N, D, sinr_weight, power_weight)
     % Decode beamforming from real vector
     F = decode_beamforming(x, U, M, N);
     F_vec = reshape(F, U, M*N);
-    
-    % Penalty weights
-    sinr_weight = 1000;
-    power_weight = 1000;
     
     % SINR constraint penalties
     sinr_violation = 0;

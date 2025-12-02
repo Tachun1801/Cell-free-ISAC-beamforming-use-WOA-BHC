@@ -44,6 +44,16 @@ function [F_star, feasible, SSNR_opt] = opt_jsc_WOA_BHC(H_comm, sigmasq_comm, ga
         woa_params.boundary_threshold = 0.15;
     end
     
+    % Default penalty weights (can be customized via woa_params)
+    if ~isfield(woa_params, 'sinr_penalty_weight')
+        woa_params.sinr_penalty_weight = 1000;
+    end
+    if ~isfield(woa_params, 'power_penalty_weight')
+        woa_params.power_penalty_weight = 1000;
+    end
+    sinr_weight = woa_params.sinr_penalty_weight;
+    power_weight = woa_params.power_penalty_weight;
+    
     % Decision variable dimension: beamforming vectors for all streams
     % Each stream has M*N complex elements
     dim = 2 * num_streams * M * N;
@@ -55,7 +65,7 @@ function [F_star, feasible, SSNR_opt] = opt_jsc_WOA_BHC(H_comm, sigmasq_comm, ga
     
     % Define objective function (negative because WOA minimizes)
     objective = @(x) compute_jsc_objective(x, H_st, a, sigmasq_comm, sigmasq_sens, ...
-        gamma, P_all, U, M, N, D, num_streams);
+        gamma, P_all, U, M, N, D, num_streams, sinr_weight, power_weight);
     
     % Run WOA-BHC optimization
     [best_pos, ~, ~] = WOA_BHC(objective, dim, woa_params.SearchAgents, ...
@@ -66,7 +76,7 @@ function [F_star, feasible, SSNR_opt] = opt_jsc_WOA_BHC(H_comm, sigmasq_comm, ga
     
     % Check feasibility
     [~, sinr_violation, power_violation, sensing_snr] = compute_jsc_objective(best_pos, H_st, a, ...
-        sigmasq_comm, sigmasq_sens, gamma, P_all, U, M, N, D, num_streams);
+        sigmasq_comm, sigmasq_sens, gamma, P_all, U, M, N, D, num_streams, sinr_weight, power_weight);
     
     feasibility_tol = 1e-2;
     if sinr_violation < feasibility_tol && power_violation < feasibility_tol
@@ -80,13 +90,9 @@ function [F_star, feasible, SSNR_opt] = opt_jsc_WOA_BHC(H_comm, sigmasq_comm, ga
     SSNR_opt = sensing_snr;
 end
 
-function [total_obj, sinr_violation, power_violation, sensing_snr] = compute_jsc_objective(x, H_st, a, sigmasq_comm, sigmasq_sens, gamma, P_all, U, M, N, D, num_streams)
+function [total_obj, sinr_violation, power_violation, sensing_snr] = compute_jsc_objective(x, H_st, a, sigmasq_comm, sigmasq_sens, gamma, P_all, U, M, N, D, num_streams, sinr_weight, power_weight)
     % Decode beamforming vectors
     [F_streams, ~] = decode_jsc_beamforming(x, M, N, num_streams);
-    
-    % Penalty weights
-    sinr_weight = 1000;
-    power_weight = 1000;
     
     % Calculate sensing SNR (objective to maximize)
     sensing_gain = 0;

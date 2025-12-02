@@ -1,7 +1,7 @@
 %% Test WOA-BHC Implementation
 % Test with simple configuration to verify the algorithm works correctly
 
-clear all;
+clearvars;
 addpath(genpath('./'));
 
 fprintf('Testing WOA-BHC Algorithm Implementation...\n\n');

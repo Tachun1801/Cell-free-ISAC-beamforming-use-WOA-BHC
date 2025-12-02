@@ -79,7 +79,7 @@ function [Best_pos, Best_score, Convergence_curve] = WOA_BHC(objective_func, dim
                     Positions(i, :) = Best_pos - A * D;       % Eq. (2.2)
                 else
                     % Search for prey (exploration)
-                    rand_leader_idx = floor(SearchAgents_no * rand()) + 1;
+                    rand_leader_idx = randi(SearchAgents_no);
                     X_rand = Positions(rand_leader_idx, :);
                     D = abs(C * X_rand - Positions(i, :));
                     Positions(i, :) = X_rand - A * D;

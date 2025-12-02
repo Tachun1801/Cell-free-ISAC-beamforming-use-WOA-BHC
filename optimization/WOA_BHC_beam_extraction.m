@@ -28,8 +28,9 @@ function [F_star_comm, F_star_sensing] = WOA_BHC_beam_extraction(F_star, H_comm)
         
         % Rank-1 approximation: extract principal eigenvector
         denom = h_u' * Q_u * h_u;
-        if abs(denom) > 1e-10
-            f_u = denom^(-1/2) * Q_u * h_u;
+        abs_denom = abs(denom);
+        if abs_denom > 1e-10
+            f_u = (1 / sqrt(abs_denom)) * Q_u * h_u;
         else
             % Fallback: use eigenvector decomposition
             [V, D] = eig(Q_u);
