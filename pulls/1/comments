@@ -1,0 +1,41 @@
+Please fix the implementation to follow the CORRECT 4-file pattern from WOA and WOA-GWO repositories:
+
+## CRITICAL FIXES REQUIRED:
+
+### 1. DELETE this file (should NOT exist):
+- `optimization/WOA_BHC_beam_extraction.m` ❌
+
+### 2. FIX `optimization/opt_jsc_WOA_BHC.m`:
+**Current (WRONG):** Returns 3 values
+```matlab
+function [F_star, feasible, SSNR_opt] = opt_jsc_WOA_BHC(...)
+```
+
+**Must change to (CORRECT):** Returns 4 values
+```matlab
+function [F_comm, F_sensing, feasible, SSNR_opt] = opt_jsc_WOA_BHC(...)
+```
+
+The function must return F_comm and F_sensing DIRECTLY - beam extraction logic should be INSIDE this function (in the `reconstruct_jsc_beamforming` helper function).
+
+### 3. FIX `simulation.m` JSC section:
+**Current (WRONG):** 2 lines with beam extraction
+```matlab
+[Q_jsc, feasible, F_jsc_SSNR] = opt_jsc_WOA_BHC(...);
+[F_jsc_comm, F_jsc_sensing] = WOA_BHC_beam_extraction(Q_jsc, H_comm);
+```
+
+**Must change to (CORRECT):** 1 line, no extraction
+```matlab
+[F_jsc_comm, F_jsc_sensing, feasible, F_jsc_SSNR] = opt_jsc_WOA_BHC(...);
+```
+
+### Reference the correct pattern from:
+- `Tachun1801/Cell-free-ISAC-beamforming-use-WOA` - Has exactly 4 files
+- `Tachun1801/Cell-free-ISAC-beamforming-use-WOA-GWO` - Has exactly 4 files
+
+**Final structure must be EXACTLY 4 files in optimization/:**
+1. WOA_BHC.m
+2. opt_comm_WOA_BHC.m
+3. opt_jsc_WOA_BHC.m (with 4 outputs!)
+4. bisection_SINR_WOA_BHC.m
