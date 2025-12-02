@@ -25,3 +25,9 @@ params.geo.UE_y = 50;
 params.geo.target_y = 50;
 params.geo.min_dist = 0;
 params.geo.max_dist = params.geo.line_length;
+
+% WOA-BHC Parameters
+params.woa.SearchAgents = 30;        % Number of whales
+params.woa.MaxIter = 100;            % Maximum iterations
+params.woa.bias_factor = 0.4;        % Biased hunting factor
+params.woa.boundary_threshold = 0.15; % Boundary hunting threshold

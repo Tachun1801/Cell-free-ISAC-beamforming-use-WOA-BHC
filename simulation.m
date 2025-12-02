@@ -54,16 +54,16 @@ function results = simulation(params, output_filename)
             solution_counter = solution_counter + 1;
     
             %% NS Sensing - Opt Comm
-            wrapped_objective = @(gamma) opt_comm_SOCP_vec(H_comm, params.sigmasq_ue, P_comm, F_sensing_NS, gamma);
-            [F_star_SOCP_NS, SINR_min_SOCP_NS] = bisection_SINR(params.bisect.low, params.bisect.high, params.bisect.tol, wrapped_objective);
+            wrapped_objective = @(gamma) opt_comm_WOA_BHC(H_comm, params.sigmasq_ue, P_comm, F_sensing_NS, gamma, params.woa);
+            [F_star_SOCP_NS, SINR_min_SOCP_NS] = bisection_SINR_WOA_BHC(params.bisect.low, params.bisect.high, params.bisect.tol, wrapped_objective);
             results{rep}.power{p_i}{solution_counter} = compute_metrics(H_comm, F_star_SOCP_NS, params.sigmasq_ue, sensing_beamsteering, F_sensing_NS, params.sigmasq_radar_rcs);
             results{rep}.power{p_i}{solution_counter}.name = 'NS+OPT';
             results{rep}.power{p_i}{solution_counter}.min_SINR_opt = SINR_min_SOCP_NS;
             solution_counter = solution_counter + 1;
             
             %% CB Sensing - OPT Comm
-            wrapped_objective = @(gamma) opt_comm_SOCP_vec(H_comm, params.sigmasq_ue, P_comm, F_sensing_CB, gamma);
-            [F_star_SOCP_CB, SINR_min_SOCP_CB] = bisection_SINR(params.bisect.low, params.bisect.high, params.bisect.tol, wrapped_objective);
+            wrapped_objective = @(gamma) opt_comm_WOA_BHC(H_comm, params.sigmasq_ue, P_comm, F_sensing_CB, gamma, params.woa);
+            [F_star_SOCP_CB, SINR_min_SOCP_CB] = bisection_SINR_WOA_BHC(params.bisect.low, params.bisect.high, params.bisect.tol, wrapped_objective);
             results{rep}.power{p_i}{solution_counter} = compute_metrics(H_comm, F_star_SOCP_CB, params.sigmasq_ue, sensing_beamsteering, F_sensing_CB, params.sigmasq_radar_rcs);
             results{rep}.power{p_i}{solution_counter}.name = 'CB+OPT';
             results{rep}.power{p_i}{solution_counter}.min_SINR_opt = SINR_min_SOCP_CB;
@@ -71,8 +71,8 @@ function results = simulation(params, output_filename)
 
             %% JSC
             sens_streams = 1;
-            [Q_jsc, feasible, F_jsc_SSNR] = opt_jsc_SDP(H_comm, params.sigmasq_ue, SINR_min_SOCP_NS, sensing_beamsteering, sens_streams, params.sigmasq_radar_rcs, params.P);
-            [F_jsc_comm, F_jsc_sensing] = SDP_beam_extraction(Q_jsc, H_comm);
+            [Q_jsc, feasible, F_jsc_SSNR] = opt_jsc_WOA_BHC(H_comm, params.sigmasq_ue, SINR_min_SOCP_NS, sensing_beamsteering, sens_streams, params.sigmasq_radar_rcs, params.P, params.woa);
+            [F_jsc_comm, F_jsc_sensing] = WOA_BHC_beam_extraction(Q_jsc, H_comm);
 
             results{rep}.power{p_i}{solution_counter} = compute_metrics(H_comm, F_jsc_comm, params.sigmasq_ue, sensing_beamsteering, F_jsc_sensing, params.sigmasq_radar_rcs);
             results{rep}.power{p_i}{solution_counter}.feasible = feasible;

@@ -1,5 +1,4 @@
-cvx_path = 'C:\Users\umt\Desktop\cvx'; % Path of the CVX installation
-addpath(genpath(cvx_path)); % Add CVX to the path
+% CVX is no longer required - using WOA-BHC instead
 addpath(genpath('./')); % Add paths of subfolders
 
 

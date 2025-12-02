@@ -2,11 +2,23 @@
 
 The implementation for the simulations of the paper "[Cell-Free ISAC MIMO Systems: Joint Sensing and Communication Beamforming](https://arxiv.org/abs/2301.11328)".
 
+### Optimization Algorithm
+
+This implementation uses **WOA-BHC (Whale Optimization Algorithm with Biased/Boundary Hunting Component)** for beamforming optimization instead of SDP/SOCP. 
+
+WOA-BHC is a metaheuristic optimization algorithm inspired by the hunting behavior of humpback whales, enhanced with:
+- **Biased Hunting Component**: Improves exploitation by guiding search agents towards promising regions
+- **Boundary Hunting Component**: Enhances exploration near search space boundaries
+
 ### Reproducing the Results
 
-* The simulation parameters can be set in `sim_params.m` file.
+* The simulation parameters can be set in `sim_params.m` file, including WOA-BHC parameters:
+  - `params.woa.SearchAgents`: Number of search agents (whales)
+  - `params.woa.MaxIter`: Maximum iterations
+  - `params.woa.bias_factor`: Biased hunting factor (0.3-0.5)
+  - `params.woa.boundary_threshold`: Boundary hunting threshold (0.1-0.2)
 
-* Set the CVX path in the first line of `run.m` and run the script to generate the simulation results. 
+* Run `run.m` to generate the simulation results (no external toolbox like CVX is required). 
 
 (This step may be skipped since the output data files are pre-generated and already available. If skipped, add the subfolders to the MATLAB path before the next steps. )
 
